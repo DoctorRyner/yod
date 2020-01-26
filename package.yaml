@@ -1,0 +1,26 @@
+name:                yod
+
+description:         Please see the README on GitHub at <https://github.com/githubuser/yod#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- record-hasfield
+- text
+- containers
+- mtl
+- megaparsec
+- parser-combinators
+- haskeline
+
+ghc-options:
+- -F -pgmF=record-dot-preprocessor
+- -Wall
+- -Wno-name-shadowing
+- -Wno-unused-do-bind
+
+default-extensions:
+- OverloadedStrings
+- LambdaCase
+
+library:
+  source-dirs: src
