@@ -10,14 +10,18 @@ import qualified Yod.Type             as Type
 
 type Runtime = ExceptT Type.Error (Reader Env)
 
-withVar :: (T.Text, Value) -> Runtime a -> Runtime a
+withVar :: (T.Text, Expr) -> Runtime a -> Runtime a
 withVar (name, value) = local $ Dict.insert name value
 
 with :: Env -> Runtime a -> Runtime a
 with = local . Dict.union
 
 lookupVar :: T.Text -> Runtime Value
-lookupVar name = (maybe (throwError $ Type.UnknownIdentifier name) pure . Dict.lookup name) =<< ask
+lookupVar name = do
+    env <- ask
+    case Dict.lookup name env of
+        Just expr -> eval expr
+        Nothing   -> throwError $ Type.UnknownIdentifier name
 
 typeOf :: Value -> Runtime Type
 typeOf = \case
@@ -51,7 +55,7 @@ eval = \case
 
         case closure of
             Closure (argName, expectedArgType) body closureEnv ->
-                with closureEnv $ withVar (argName, argValue) $ do
+                with closureEnv $ withVar (argName, Value argValue) $ do
                     argType <- typeOf argValue
                     if expectedArgType == argType
                     then eval body

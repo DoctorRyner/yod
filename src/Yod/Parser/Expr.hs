@@ -1,5 +1,6 @@
 module Yod.Parser.Expr where
 
+import qualified Data.Map        as Dict
 import qualified Data.Text       as T
 import           Yod.Expr
 import           Yod.Parser
@@ -71,4 +72,6 @@ letIn = do
 
     symbol "in"
 
-    LetIn mempty <$> expr
+    let env = Dict.fromList lets
+
+    LetIn env <$> expr

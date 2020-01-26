@@ -5,7 +5,7 @@ import qualified Data.Map  as Dict
 import qualified Data.Text as T
 import           Yod.Type  (Type)
 
-type Env = Dict.Map T.Text Value
+type Env = Dict.Map T.Text Expr
 
 data Value
     = Int      Int
