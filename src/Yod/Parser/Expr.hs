@@ -50,12 +50,20 @@ var = Var <$> (try . check =<< nameL)
 lambda :: Parser Expr
 lambda = do
     symbol "\\"
-    argName <- nameL
-    symbol "::"
-    type_   <- type_
+    types <-
+        sepBy1
+            (do
+                argName <- nameL
+                symbol "::"
+                type_   <- type_
+                pure (argName, type_)
+            )
+            $ symbol ","
     sc
     symbol "->"
-    Lambda (argName, type_) <$> expr
+    body <- expr
+
+    pure $ foldr Lambda body types
 
 letIn :: Parser Expr
 letIn = do
