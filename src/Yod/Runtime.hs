@@ -10,8 +10,8 @@ import qualified Yod.Type             as Type
 
 type Runtime = ExceptT Type.Error (Reader Env)
 
-withVar :: (T.Text, Expr) -> Runtime a -> Runtime a
-withVar (name, value) = local $ Dict.insert name value
+withVar :: Env -> (T.Text, Value) -> Env
+withVar env (name, value) = Dict.insert name (Value value) env
 
 with :: Env -> Runtime a -> Runtime a
 with = local . Dict.union
@@ -56,7 +56,7 @@ eval = \case
         let evalClosure closure =
                 case closure of
                     Closure (argName, expectedArgType) body closureEnv ->
-                        withVar (argName, Value argValue) $ with closureEnv $ do
+                        with (closureEnv `withVar` (argName, argValue)) $ do
                             argType <- typeOf argValue
                             if expectedArgType == argType
                             then evalBody body argName closureEnv
@@ -65,7 +65,7 @@ eval = \case
 
             evalBody body argName closureEnv =
                 eval $ case body of
-                    Lambda var lambdaBody -> Value $ Closure var lambdaBody $ Dict.insert argName (Value argValue) closureEnv
+                    Lambda var lambdaBody -> Value $ Closure var lambdaBody $ closureEnv `withVar` (argName, argValue)
                     otherExpr             -> otherExpr
 
         evalClosure closure

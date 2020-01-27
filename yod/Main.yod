@@ -7,7 +7,7 @@ const :: Int -> Int -> Int
 const x y = x
 
 int1 :: Int
-int1 = idInt 10
+int1 = id 10
 
 float1 :: Float
 float1 = 9.56
