@@ -30,13 +30,10 @@ closureFromVars body = \case
 funcToVar :: Statement -> Except T.Text (T.Text, Expr)
 funcToVar = \case
     Func name argTypes argNames body -> do
-        let funcBody =
-                if null argNames
-                then body
-                else closureFromVars body $ zip argNames $ take (length argTypes - 1) argTypes
-
-        pure (name, funcBody)
-    -- statement          -> throwError $ "Can't convert to a variable: " <> T.pack (show statement)
+        pure
+            ( name
+            , closureFromVars body $ zip argNames $ take (length argTypes - 1) argTypes
+            )
 
 func :: Parser Statement
 func = do
@@ -49,7 +46,7 @@ func = do
 
     symbol name
 
-    argNames <- nameL `sepBy` symbol " "
+    argNames <- nameL `sepBy` scn
 
     symbol "="
 
