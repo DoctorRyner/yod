@@ -80,5 +80,8 @@ eval = \case
 
             value -> throwError . Type.Missmatch Type.Bool =<< typeOf value
 
+runtimeIn :: Env -> Expr -> Either Type.Error Value
+runtimeIn env expr = runReader (runExceptT $ eval expr) env
+
 runtime :: Expr -> Either Type.Error Value
-runtime expr = runReader (runExceptT $ eval expr) mempty
+runtime = runtimeIn mempty

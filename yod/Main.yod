@@ -1,0 +1,10 @@
+module Main
+
+idInt :: Int -> Int
+idInt x = x
+
+int1 :: Int
+int1 = 10
+
+float1 :: Float
+float1 = 9.56
