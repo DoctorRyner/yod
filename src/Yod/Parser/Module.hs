@@ -26,7 +26,6 @@ closureFromVars body = \case
     []     -> body
     var:xs -> Lambda var $ closureFromVars body xs
 
-
 funcToVar :: Statement -> Except T.Text (T.Text, Expr)
 funcToVar = \case
     Func name argTypes argNames body -> do

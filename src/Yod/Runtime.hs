@@ -45,7 +45,7 @@ eval :: Expr -> Runtime Value
 eval = \case
     Value value -> pure value
 
-    Lambda var body -> Closure var body <$> ask
+    Lambda var body -> pure $ Closure var body mempty
 
     Var name -> lookupVar name
 
@@ -53,14 +53,22 @@ eval = \case
         closure  <- eval lambda
         argValue <- eval arg
 
-        case closure of
-            Closure (argName, expectedArgType) body closureEnv ->
-                with closureEnv $ withVar (argName, Value argValue) $ do
-                    argType <- typeOf argValue
-                    if expectedArgType == argType
-                    then eval body
-                    else throwError $ Type.Missmatch expectedArgType argType
-            value -> throwError $ Type.NotAFunction $ T.pack $ show value
+        let evalClosure closure =
+                case closure of
+                    Closure (argName, expectedArgType) body closureEnv ->
+                        withVar (argName, Value argValue) $ with closureEnv $ do
+                            argType <- typeOf argValue
+                            if expectedArgType == argType
+                            then evalBody body argName closureEnv
+                            else throwError $ Type.Missmatch expectedArgType argType
+                    value -> throwError $ Type.NotAFunction $ T.pack $ show value
+
+            evalBody body argName closureEnv =
+                eval $ case body of
+                    Lambda var lambdaBody -> Value $ Closure var lambdaBody $ Dict.insert argName (Value argValue) closureEnv
+                    otherExpr             -> otherExpr
+
+        evalClosure closure
 
     LetIn letEnv body -> with letEnv $ eval body
 
